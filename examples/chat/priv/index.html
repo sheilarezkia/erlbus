@@ -10,16 +10,20 @@
         function init() {
           jQuery("#roomContainer").hide();  
           jQuery("#alertContainer").hide();
-          jQuery("#connectButton").hide();
+          jQuery("#connectToChat").hide();
           if(!("WebSocket" in window)){  
             showAlert('<span style="color: red;">Your Web Browser doesn\'t support Websockets!</span>');
           } else {
-            jQuery("#connectButton").show();
+            jQuery("#connectToChat").show();
           };
         };
 
         function connect() {
-        wsHost = "ws://" + window.location.host + "/websocket";
+        let username = jQuery("#chooseUsername").val();
+          jQuery("#chooseUsername").hide();
+          jQuery("#connectToChat").hide();
+          jQuery("#greetings").append("<h3> Hello " + username + "! </h3>")
+        wsHost = "ws://" + window.location.host + "/websocket/" + username;
         websocket = new WebSocket(wsHost);
         websocket.onopen = function(evt) { onOpen(evt) }; 
         websocket.onclose = function(evt) { onClose(evt) }; 
@@ -33,7 +37,10 @@
 
       function onClose(evt) { 
         jQuery('#roomContainer').fadeOut('slow');
-        showAlert('<span style="color: red;">Websocket connection has been closed!</span>');
+        jQuery("#chooseUsername").hide();
+        jQuery("#connectToChat").hide();
+        jQuery("#greetings").empty();
+        showAlert('<span style="color: red; font-family:sans-serif; font-size:1.5em;">Sorry, Websocket connection has been closed!</span>');
       };  
 
       function onMessage(evt) { 
@@ -41,7 +48,7 @@
       };  
 
       function onError(evt) {
-        showAlert('<span style="color: red;">ERROR: ' + evt.data+ '</span>');
+        showAlert('<span style="color: red;font-family:sans-serif; font-size:1.5em;">ERROR: ' + evt.data+ '</span>');
       };
 
       function sendMessage() {
@@ -55,7 +62,7 @@
       };
 
       function showMessage(data) {
-        jQuery('#chatContainer').append('<div>' + data.sender + ' -> ' + data.msg + '</div>');
+        jQuery('#chatContainer').append('<div>' + data.sender + data.msg + '</div>');
       };
 
       function showAlert(txt) {
@@ -68,13 +75,38 @@
           background-color:lightgray;
           min-width: 300px;
           min-height: 200px;
+          padding-left: 25px;
+          padding-top: 25px;
+          font-family: sans-serif;
+          letter-spacing: .5px;
+        }
+
+        div#greetings {
+          font-family: sans-serif;
+        }
+
+        form {
+          margin-top: 1em;
+          margin-left: .8em;
+        }
+
+        #chooseUsername {
+          margin-left: 20px;
+          margin-top: 10px;
+        }
+
+        #conectTochat {
+          margin-left: 20px;
+          margin-top: 10px;
         }
       </style>
   </head>
   <body>
     <div id="alertContainer"></div>
-    <input id="connectButton" type="button" value="Join the Chat Room!" onclick="connect();"/>
+    <input id="chooseUsername" placeholder="Username" type="text" />
+    <input id="connectToChat" type="button" value="Join the Chat Room!" onclick="connect();"/>
 
+    <div id="greetings"></div>
     <div id="roomContainer">
       <div id="chatContainer"></div>
       <form onsubmit="sendMessage(); return false;">
